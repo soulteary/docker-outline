@@ -1,0 +1,54 @@
+version: "3"
+services:
+
+  linx-server:
+    image: ${DOCKER_ATTACHMENT_IMAGE_NAME}
+    container_name: linx-server
+    restart: always
+    command: -config /data/linx-server.conf
+    volumes:
+      - ./data/linx/files:/data/files
+      - ./data/linx/meta:/data/meta
+      - ./config/attachment.conf:/data/linx-server.conf
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+
+      - "traefik.http.middlewares.upload-gzip.compress=true"
+      - "traefik.http.middlewares.upload-redir-https.redirectScheme.scheme=https"
+
+      - "traefik.http.middlewares.upload-auth.basicauth.users=${DOCKER_ATTACHMENT_BASIC_AUTH}"
+      - "traefik.http.middlewares.upload-auth.basicauth.removeheader=true"
+
+      - "traefik.http.routers.upload-admin.middlewares=upload-auth"
+      - "traefik.http.routers.upload-admin.entrypoints=https"
+      - "traefik.http.routers.upload-admin.tls=true"
+      - "traefik.http.routers.upload-admin.rule=Host(`${DOCKER_ATTACHMENT_HOSTNAME}`)"
+
+      - "traefik.http.routers.upload-http.entrypoints=http"
+      - "traefik.http.routers.upload-http.rule=Host(`${DOCKER_ATTACHMENT_HOSTNAME}`) && PathPrefix(`/raw/`)"
+      - "traefik.http.routers.upload-http.middlewares=upload-redir-https"
+
+      - "traefik.http.routers.upload-https.middlewares=upload-gzip"
+      - "traefik.http.routers.upload-https.entrypoints=https"
+      - "traefik.http.routers.upload-https.tls=true"
+      - "traefik.http.routers.upload-https.rule=Host(`${DOCKER_ATTACHMENT_HOSTNAME}`) && PathPrefix(`/raw/`)"
+
+      - "traefik.http.services.upload-backend.loadbalancer.server.scheme=http"
+      - "traefik.http.services.upload-backend.loadbalancer.server.port=8080"
+    extra_hosts:
+      - "${DOCKER_ATTACHMENT_HOSTNAME}:0.0.0.0"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 3s
+      retries: 12
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+networks:
+  traefik:
+    external: true

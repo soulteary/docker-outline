@@ -1,0 +1,29 @@
+version: "3"
+services:
+
+  postgres:
+    image: ${DOCKER_POSTGRES_IMAGE_NAME}
+    container_name: ${DOCKER_POSTGRES_HOST}
+    environment:
+      POSTGRES_USER: ${DOCKER_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DOCKER_POSTGRES_PASS}
+      POSTGRES_DB: ${DOCKER_POSTGRES_DBNAME}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./data/pgdata:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - outline
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DOCKER_POSTGRES_USER}"]
+      interval: 3s
+      retries: 12
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+networks:
+  outline:
+    external: true

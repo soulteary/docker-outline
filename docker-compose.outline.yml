@@ -1,0 +1,85 @@
+version: "3"
+services:
+
+  outline:
+    image: ${DOCKER_OUTLINE_IMAGE_NAME}
+    container_name: outline
+    command: sh -c "yarn sequelize:migrate --env production-ssl-disabled && yarn start"
+    environment:
+      - URL=${OUTLINE_URL}
+      - FORCE_HTTPS=false
+      # SSO
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_AUTH_URI=${OIDC_AUTH_URI}
+      - OIDC_TOKEN_URI=${OIDC_TOKEN_URI}
+      - OIDC_USERINFO_URI=${OIDC_USERINFO_URI}
+      - OIDC_DISPLAY_NAME=${OIDC_DISPLAY_NAME}
+      - ALLOWED_DOMAINS=${OIDC_ALLOWED_DOMAINS}
+      # DB
+      - DATABASE_URL=${DATABASE_URL}
+      - PGSSLMODE=${PGSSLMODE}
+      - REDIS_URL=${REDIS_URL}
+      # Secret
+      - SECRET_KEY=${OUTLINE_SECRET_KEY}
+      - UTILS_SECRET=${OUTLINE_UTILS_SECRET}
+      # S3
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_S3_UPLOAD_BUCKET_URL=${AWS_S3_UPLOAD_BUCKET_URL}
+      - AWS_S3_UPLOAD_BUCKET_NAME=${AWS_S3_UPLOAD_BUCKET_NAME}
+      - AWS_S3_UPLOAD_MAX_SIZE=${AWS_S3_UPLOAD_MAX_SIZE}
+      - AWS_S3_FORCE_PATH_STYLE=${AWS_S3_FORCE_PATH_STYLE}
+      - AWS_S3_ACL=${AWS_S3_ACL}
+      # etc.
+      - ENABLE_UPDATES=true
+      - MAXIMUM_IMPORT_SIZE=5120000
+      - DEBUG=cache,presenters,events,emails,mailer,utils,http,server,services
+      - SLACK_MESSAGE_ACTIONS=false
+      - DEFAULT_LANGUAGE=en_US
+    restart: always
+    # volumes:
+    #  - ./patches/...:/opt/outline/...
+    networks:
+      - traefik
+      - outline
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+
+      - "traefik.http.middlewares.outline-gzip.compress=true"
+      - "traefik.http.middlewares.outline-redir-https.redirectScheme.scheme=https"
+
+      - "traefik.http.routers.outline-http.entrypoints=http"
+      - "traefik.http.routers.outline-http.rule=Host(`${DOCKER_OUTLINE_HOSTNAME}`)"
+      - "traefik.http.routers.outline-http.middlewares=outline-redir-https"
+
+      - "traefik.http.routers.outline-https.middlewares=outline-gzip"
+      - "traefik.http.routers.outline-https.entrypoints=https"
+      - "traefik.http.routers.outline-https.tls=true"
+      - "traefik.http.routers.outline-https.rule=Host(`${DOCKER_OUTLINE_HOSTNAME}`)"
+
+      - "traefik.http.routers.outline-https-assets.middlewares=outline-gzip"
+      - "traefik.http.routers.outline-https-assets.entrypoints=https"
+      - "traefik.http.routers.outline-https-assets.tls=true"
+      - "traefik.http.routers.outline-https-assets.rule=Host(`${DOCKER_OUTLINE_HOSTNAME}`) && PathPrefix(`/static`, `/api`)"
+
+      - "traefik.http.services.outline-backend.loadbalancer.server.scheme=http"
+      - "traefik.http.services.outline-backend.loadbalancer.server.port=3000"
+    extra_hosts:
+      - "${DOCKER_OUTLINE_HOSTNAME}:0.0.0.0"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
+      interval: 3s
+      retries: 12
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+networks:
+  outline:
+    external: true
+  traefik:
+    external: true

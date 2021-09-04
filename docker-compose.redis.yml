@@ -1,0 +1,27 @@
+version: "3"
+services:
+
+  redis:
+    image: ${DOCKER_REDIS_IMAGE_NAME}
+    container_name: ${DOCKER_REDIS_HOSTNAME}
+    restart: always
+    networks:
+      - outline
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 12
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./data/redis:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+networks:
+  outline:
+    external: true

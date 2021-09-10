@@ -2,14 +2,16 @@
 
 This project is mainly used to demonstrate how to use privatized deployment (Self-Hosted).
 
-Since the current official image that incorporates [Generic OAuth2 Authentication](https://github.com/outline/outline/pull/2388/files) has not yet been provided, I temporarily constructed a temporary image, which can be directly switched to the official image after the official launch of `0.58.3`.
+You can replace .env with a new version number to complete an unsense upgrade of the application.
+
+[中文用户可以阅读这里](https://soulteary.com/2021/09/05/opensource-documentation-wiki-software-outline-part-1.html)
 
 ## Project Dependency
 
 - Traefik: `traefik:v2.5`
     - Used as a service gateway for various applications, providing service discovery, domain name binding and other functions.
-- Outline Server: `soulteary/outline:0.58.3`
-    - Before the official version is updated, temporarily customized outline service.
+- Outline Server: `outlinewiki/outline:0.59.0`
+    - Outline application.
 - S3 Server: `minio/minio:RELEASE.2021-09-03T03-56-13Z`
     - Provide object storage capabilities.
 - SSO Server: `soulteary/sso-server:1.1.5`

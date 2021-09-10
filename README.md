@@ -14,6 +14,8 @@ You can replace .env with a new version number to complete an unsense upgrade of
     - Outline application.
 - S3 Server: `minio/minio:RELEASE.2021-09-03T03-56-13Z`
     - Provide object storage capabilities.
+- S3 Client: `minio/mc:RELEASE.2021-09-02T09-21-27Z`
+    - Initialize the `bucket` required by the application
 - SSO Server: `soulteary/sso-server:1.1.5`
     - Make it possible for the outline to log in locally.
 - Database: `postgres:13.3`
@@ -65,5 +67,20 @@ outline_minio      /usr/bin/docker-entrypoint ...   Up (healthy)   9000/tcp
 sso-server         docker-entrypoint.sh ./main      Up (healthy)   80/tcp   
 ```
 
-4. Open the browser and enjoy.
+4. Create the bucket storage space required for the application
+
+It only needs to be executed when the application is first initialized.
+
+```bash
+docker-compose -f docker-compose.minio-init.yml up 
+Recreating outline_minio_client ... done
+Attaching to docker-outline_minio-client_1
+minio-client_1  | Removed `local` successfully.
+minio-client_1  | Added `local` successfully.
+minio-client_1  | Bucket created successfully `local/outline/`.
+minio-client_1  | Access permission for `local/outline` is set to `public`
+docker-outline_minio-client_1 exited with code 0
+```
+
+5. Open the browser and enjoy.
 

@@ -4,7 +4,11 @@ This project is mainly used to demonstrate how to use privatized deployment (Sel
 
 You can replace .env with a new version number to complete an unsense upgrade of the application.
 
-[中文用户可以阅读这里](https://soulteary.com/2021/09/05/opensource-documentation-wiki-software-outline-part-1.html)
+**中文用户可以阅读下面的配置教程**
+
+- https://soulteary.com/2021/09/05/opensource-documentation-wiki-software-outline-part-1.html
+- https://soulteary.com/2021/09/11/opensource-documentation-wiki-software-outline-part-2.html
+
 
 ## Project Dependency
 

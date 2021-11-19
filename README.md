@@ -14,7 +14,7 @@ You can replace .env with a new version number to complete an unsense upgrade of
 
 - Traefik: `traefik:v2.5`
     - Used as a service gateway for various applications, providing service discovery, domain name binding and other functions.
-- Outline Server: `outlinewiki/outline:0.59.0`
+- Outline Server: `outlinewiki/outline:0.60.3`
     - Outline application.
 - S3 Server: `minio/minio:RELEASE.2021-09-03T03-56-13Z`
     - Provide object storage capabilities.
